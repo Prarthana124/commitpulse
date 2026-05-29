@@ -120,5 +120,4 @@ describe('RateLimiter', () => {
 
     expect(limiter.check('5.5.5.5')).toBe(true);
   });
- main
 });
