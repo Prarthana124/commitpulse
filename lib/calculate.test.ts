@@ -488,6 +488,72 @@ describe('calculateStreak', () => {
     expect(resultTuesday.currentStreak).toBe(0);
     expect(resultTuesday.longestStreak).toBe(2);
   });
+
+  it('verify streak formulas for multiple weeks gaps timeline (Variation 3)', () => {
+    // Streak 1: 5 days
+    // Gap 1: 14 days (2 weeks of zeros)
+    // Streak 2: 10 days (longest)
+    // Gap 2: 21 days (3 weeks of zeros)
+    // Streak 3: 3 days (current) ending on the last day
+    const calendar = buildCalendar([
+      1,
+      1,
+      1,
+      1,
+      1, // Streak 1 (5 days)
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0, // Gap 1 (14 days)
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1, // Streak 2 (10 days)
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0, // Gap 2 (21 days)
+      1,
+      1,
+      1, // Streak 3 (3 days - ending on last day)
+    ]);
+    const result = calculateStreak(calendar);
+    expect(result.longestStreak).toBe(10);
+    expect(result.currentStreak).toBe(3);
+  });
 });
 
 it('handles massive single-day commit spike timeline', () => {
