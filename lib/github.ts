@@ -366,7 +366,8 @@ export function displayName(profile: GitHubUserProfile): string {
 
 function mergeCalendars(
   oldCal: ContributionCalendar,
-  newCal: ContributionCalendar
+  newCal: ContributionCalendar,
+  authoritativeTotal?: number
 ): ContributionCalendar {
   const dayMap = new Map<string, ContributionDay>();
 
@@ -399,10 +400,10 @@ function mergeCalendars(
     mergedWeeks.push(currentWeek);
   }
 
-  const total = sortedDays.reduce((sum, d) => sum + d.contributionCount, 0);
+  const calculatedTotal = sortedDays.reduce((sum, d) => sum + d.contributionCount, 0);
 
   return {
-    totalContributions: total,
+    totalContributions: authoritativeTotal ?? calculatedTotal,
     weeks: mergedWeeks,
   };
 }
@@ -557,9 +558,12 @@ async function fetchContributionsUncached(
   }
 
   if (isDeltaSync && cached) {
-    calendar = mergeCalendars(cached.calendar, calendar);
+    calendar = mergeCalendars(
+      cached.calendar,
+      calendar,
+      data.data.user.contributionsCollection.contributionCalendar.totalContributions
+    );
   }
-
   // Inject deterministic Lines of Code (LoC) approximation
   // Since GitHub's contributionCalendar doesn't provide native LoC metrics,
   // we generate a consistent estimation based on the day's commit volume.
