@@ -120,16 +120,25 @@ export async function GET(request: Request) {
       }
     }
 
-    let from = customFrom
-      ? new Date(customFrom).toISOString()
-      : year
-        ? `${year}-01-01T00:00:00Z`
-        : undefined;
-    let to = customTo
-      ? new Date(customTo).toISOString()
-      : year
-        ? `${year}-12-31T23:59:59Z`
-        : undefined;
+    const parseDate = (value?: string) => {
+      if (!value) {
+        return undefined;
+      }
+
+      const date = new Date(value);
+
+      if (Number.isNaN(date.getTime())) {
+        const validationErr = new Error(`Invalid date: ${value}`);
+        validationErr.name = 'ValidationError';
+        throw validationErr;
+      }
+
+      return date.toISOString();
+    };
+
+    let from = parseDate(customFrom) ?? (year ? `${year}-01-01T00:00:00Z` : undefined);
+
+    let to = parseDate(customTo) ?? (year ? `${year}-12-31T23:59:59Z` : undefined);
 
     if (normalizedView === 'monthly') {
       const referenceDate = getMonthlyReferenceDate(year, timezone) || new Date();
