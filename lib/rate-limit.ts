@@ -146,11 +146,13 @@ export class RateLimiter {
 
     if (url && token) {
       try {
-        await fetch(`${url}/del/ratelimit_class:${ip}`, {
+        await fetch(`${url}/pipeline`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
           },
+          body: JSON.stringify([['DEL', `ratelimit_class:${ip}`]]),
         });
       } catch (error) {
         console.error('RateLimiter KV reset error:', error);
