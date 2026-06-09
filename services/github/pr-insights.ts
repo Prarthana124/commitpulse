@@ -68,7 +68,7 @@ async function fetchPRInsightsUncached(username: string): Promise<PRInsightData>
   // We use the GraphQL search API to get PRs authored by the user and PRs reviewed by the user.
   // This is more efficient than iterating through user.pullRequests.
 
-const query = `
+  const query = `
     query($authorQuery: String!, $reviewerQuery: String!, $after: String) {
       authored: search(query: $authorQuery, type: ISSUE, first: 100, after: $after) {
         nodes {
