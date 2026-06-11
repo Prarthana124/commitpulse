@@ -6,7 +6,7 @@ import DashboardSkeleton from './DashboardSkeleton';
 import { X, RefreshCw, Share2 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import type { Achievement, Repository, HallOfFameAward } from '@/types/dashboard';
+import type { Achievement, Repository, HallOfFameAward, RepoActivityInfo } from '@/types/dashboard';
 import type { GraphNode, GraphLink } from '@/types';
 
 import RefreshButton from './RefreshButton';
@@ -29,6 +29,7 @@ import ProfileOptimizerModal from './ProfileOptimizerModal';
 import ResumeProfileSection from './ResumeProfileSection';
 import type { DashboardPeriod } from '@/utils/dashboardPeriod';
 import { PopularRepos } from './PopularPinnnedRepos';
+import InactiveRepoReminder from './InactiveRepoReminder';
 import PRInsightsClient from './PRInsights/PRInsightsClient';
 import CIAnalyticsClient from './CIAnalytics/CIAnalyticsClient';
 
@@ -86,6 +87,7 @@ export interface DashboardData {
 
 interface DashboardClientProps {
   initialData: DashboardData;
+  allRepoActivity?: RepoActivityInfo[];
   username: string;
   compareData?: DashboardData | null;
   period: DashboardPeriod;
@@ -320,6 +322,7 @@ function getPersonalityTags(
 
 export default function DashboardClient({
   initialData,
+  allRepoActivity = [],
   username,
   compareData = null,
   period,
@@ -740,6 +743,8 @@ export default function DashboardClient({
               popularRepos={initialData.popularRepos || []}
               pinnedRepos={initialData.pinnedRepos || []}
             />
+
+            <InactiveRepoReminder repos={allRepoActivity} />
           </aside>
 
           <div className="col-span-1 lg:col-span-3">
