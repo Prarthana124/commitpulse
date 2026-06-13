@@ -114,10 +114,8 @@ describe('GET /api/stats - Edge Cases & Empty/Missing Inputs Verification', () =
         totalContributions: 0,
         weeks: [
           {
-            contributionDays: [
-              { date: '', contributionCount: 0 }
-            ]
-          }
+            contributionDays: [{ date: '', contributionCount: 0 }],
+          },
         ],
       },
       repoContributions: [],
