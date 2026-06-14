@@ -14,7 +14,6 @@ import {
   truncateUsername,
   deterministicRandom,
   buildTowerPaths,
-  particleCount,
 } from './generator';
 import { escapeXML } from './sanitizer';
 import type { BadgeParams, ContributionCalendar, StreakStats, MonthlyStats } from '../../types';

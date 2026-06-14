@@ -608,8 +608,8 @@ function buildErrorResponse(error: unknown, parseResult: ParseResult): NextRespo
     const MAX_LINE = 48;
     const truncated = text.length > MAX_LINE * 2 ? text.slice(0, MAX_LINE * 2 - 1) + '…' : text;
 
-    const line1 = escapeSVGText(truncated.slice(0, MAX_LINE));
-    const line2 = truncated.length > MAX_LINE ? escapeSVGText(truncated.slice(MAX_LINE)) : null;
+    const line1 = escapeXML(truncated.slice(0, MAX_LINE));
+    const line2 = truncated.length > MAX_LINE ? escapeXML(truncated.slice(MAX_LINE)) : null;
 
     const textY = line2 ? '62' : '75';
 
