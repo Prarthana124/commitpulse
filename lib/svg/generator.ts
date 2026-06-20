@@ -25,7 +25,7 @@ import {
 
 import { GRID_ORIGIN_X, GRID_ORIGIN_Y, TILE_HEIGHT_HALF, TILE_WIDTH_HALF } from './layoutConstants';
 
-import { SVG_WIDTH, SVG_HEIGHT } from './generatorConstants';
+import { SVG_WIDTH, SVG_HEIGHT, MAX_USERNAME_DISPLAY_LENGTH } from './generatorConstants';
 
 const FONT_MAP = {
   jetbrains: '"JetBrains Mono", monospace',
@@ -63,7 +63,9 @@ export function getSizeScale(size?: 'small' | 'medium' | 'large') {
 }
 
 export function truncateUsername(username: string): string {
-  return username.length > 12 ? `${username.slice(0, 12)}...` : username;
+  return username.length > MAX_USERNAME_DISPLAY_LENGTH
+    ? `${username.slice(0, MAX_USERNAME_DISPLAY_LENGTH)}...`
+    : username;
 }
 
 export function deterministicRandom(seed?: string | null): number {
@@ -148,17 +150,17 @@ function generateParticles(
     const fillAttr = autoTheme ? 'class="cp-accent-fill"' : `fill="${color}"`;
 
     particles += `
-      <circle ${fillAttr} cx="${x + offsetX}" cy="${y - height}" r="${1.5 * sf}" opacity="1" pointer-events="none">
-      ${
-        animate
-          ? `
-        <animate attributeName="cy" from="${y - height}" to="${y - height - Math.round(20 * sf)}" dur="1.5s" begin="${delay}s" repeatCount="indefinite" />
-        <animate attributeName="opacity" from="1" to="0" dur="1.5s" begin="${delay}s" repeatCount="indefinite" />
-      `
-          : ''
-      }
-      </circle>
-    `;
+       <circle ${fillAttr} cx="${x + offsetX}" cy="${y - height}" r="${1.5 * sf}" opacity="1" pointer-events="none">
+       ${
+         animate
+           ? `
+         <animate attributeName="cy" from="${y - height}" to="${y - height - Math.round(20 * sf)}" dur="1.5s" begin="${delay}s" repeatCount="indefinite" />
+         <animate attributeName="opacity" from="1" to="0" dur="1.5s" begin="${delay}s" repeatCount="indefinite" />
+       `
+           : ''
+       }
+       </circle>
+     `;
   }
   return `<g class="heat-particles" pointer-events="none">${particles}</g>`;
 }
@@ -217,13 +219,13 @@ function generateCustomGradients(params: BadgeParams): { gradients: string; grad
 
       const colorHex = color.startsWith('#') ? color : `#${color}`;
       stopElements += `
-        <stop offset="${offset}%" stop-color="${colorHex}" stop-opacity="${stopOpacity}" />`;
+         <stop offset="${offset}%" stop-color="${colorHex}" stop-opacity="${stopOpacity}" />`;
     });
 
     gradients += `
-      <linearGradient id="${levelId}" x1="${coords.x1}" y1="${coords.y1}" x2="${coords.x2}" y2="${coords.y2}">
+       <linearGradient id="${levelId}" x1="${coords.x1}" y1="${coords.y1}" x2="${coords.x2}" y2="${coords.y2}">
 ${stopElements}
-      </linearGradient>`;
+       </linearGradient>`;
   }
 
   params.__customGradientId = gradientId;
@@ -246,10 +248,10 @@ function renderDefs(sf: number, params: BadgeParams): string {
         for (let i = 0; i < 4; i++) {
           const level = i + 1;
           gradients += `
-      <linearGradient id="tower-grad-level-${level}" x1="0" y1="1" x2="0" y2="0">
-        <stop offset="0%" stop-color="var(--cp-bg)" stop-opacity="0.1" />
-        <stop offset="100%" stop-color="var(--cp-accent)" stop-opacity="${0.4 + i * 0.2}" />
-      </linearGradient>`;
+       <linearGradient id="tower-grad-level-${level}" x1="0" y1="1" x2="0" y2="0">
+         <stop offset="0%" stop-color="var(--cp-bg)" stop-opacity="0.1" />
+         <stop offset="100%" stop-color="var(--cp-accent)" stop-opacity="${0.4 + i * 0.2}" />
+       </linearGradient>`;
         }
       } else {
         const accent = params.accent;
@@ -266,10 +268,10 @@ function renderDefs(sf: number, params: BadgeParams): string {
         colors.forEach((c, idx) => {
           const level = idx + 1;
           gradients += `
-      <linearGradient id="tower-grad-level-${level}" x1="0" y1="1" x2="0" y2="0">
-        <stop offset="0%" stop-color="${bgHex}" stop-opacity="0.1" />
-        <stop offset="100%" stop-color="${c}" stop-opacity="${0.4 + idx * 0.2}" />
-      </linearGradient>`;
+       <linearGradient id="tower-grad-level-${level}" x1="0" y1="1" x2="0" y2="0">
+         <stop offset="0%" stop-color="${bgHex}" stop-opacity="0.1" />
+         <stop offset="100%" stop-color="${c}" stop-opacity="${0.4 + idx * 0.2}" />
+       </linearGradient>`;
         });
       }
     }
@@ -302,24 +304,24 @@ function renderDefs(sf: number, params: BadgeParams): string {
       const x2 = Math.round(50 + Math.cos(angleRad) * 50) + '%';
       const y2 = Math.round(50 + Math.sin(angleRad) * 50) + '%';
       canvasGradient = `
-      <linearGradient id="canvas-gradient" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}">
-        <stop offset="0%" stop-color="${bgStart}" />
-        <stop offset="100%" stop-color="${bgEnd}" />
-      </linearGradient>`;
+       <linearGradient id="canvas-gradient" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}">
+         <stop offset="0%" stop-color="${bgStart}" />
+         <stop offset="100%" stop-color="${bgEnd}" />
+       </linearGradient>`;
     } else {
       canvasGradient = `
-      <radialGradient id="canvas-gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-        <stop offset="0%" stop-color="${bgStart}" />
-        <stop offset="100%" stop-color="${bgEnd}" />
-      </radialGradient>`;
+       <radialGradient id="canvas-gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+         <stop offset="0%" stop-color="${bgStart}" />
+         <stop offset="100%" stop-color="${bgEnd}" />
+       </radialGradient>`;
     }
   }
 
   return `<defs>
-    ${filterGlow}
-    ${gradients}
-    ${canvasGradient}
-  </defs>`;
+     ${filterGlow}
+     ${gradients}
+     ${canvasGradient}
+   </defs>`;
 }
 
 function renderStatsSection(
@@ -1979,7 +1981,7 @@ export function generateNotFoundSVG(
   </defs>
 
   <style>
-@import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap');    .title  { font-family: "Syncopate", sans-serif; fill: ${text}; font-size: 18px; letter-spacing: 6px; font-weight: 400; opacity: 0.5; }
+@import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&amp;family=Space+Grotesk:wght@400;500;600&amp;display=swap');    .title  { font-family: "Syncopate", sans-serif; fill: ${text}; font-size: 18px; letter-spacing: 6px; font-weight: 400; opacity: 0.5; }
     .label  { font-family: "Roboto", sans-serif; fill: ${accent}; font-size: 11px; letter-spacing: 2px; opacity: 0.4; }
     .stats  { font-family: "Space Grotesk", sans-serif; fill: ${text}; font-size: 42px; font-weight: 500; opacity: 0.2; }
     .ghost-pulse { animation: gp 2.6s ease-in-out infinite; }
@@ -2893,9 +2895,9 @@ function renderSkylineSVG(
     `;
   }
 
-  const groundStroke = isAutoTheme ? 'var(--cp-accent)' : accent;
+  const strokeStroke = isAutoTheme ? 'var(--cp-accent)' : accent;
   const groundLine = `
-    <line x1="${paddingX}" y1="${bottomY}" x2="${width - paddingX}" y2="${bottomY}" stroke="${groundStroke}" stroke-width="1.5" stroke-opacity="0.6" filter="url(#horizonGlow)" />
+    <line x1="${paddingX}" y1="${bottomY}" x2="${width - paddingX}" y2="${bottomY}" stroke="${strokeStroke}" stroke-width="1.5" stroke-opacity="0.6" filter="url(#horizonGlow)" />
   `;
 
   const upperUser = escapeXML((params.user || 'GitHub User').toUpperCase());
@@ -2975,19 +2977,14 @@ function renderSkylineSVG(
 
   <rect width="${width}" height="${height}" rx="${radius}" class="${isAutoTheme && !params.hideBackground ? 'cp-bg-fill' : ''}" fill="${params.hideBackground ? 'transparent' : styleBg}" />
 
-  <!-- Sky glow gradient -->
   <rect x="${paddingX}" y="${paddingYTop - 20}" width="${graphWidth}" height="${graphHeight + 20}" fill="url(#skyGradient)" />
 
-  <!-- Stars Background -->
   <g class="cp-stars">${starsSVG}</g>
 
-  <!-- Skyline Buildings -->
   <g class="cp-skyline">${buildingsSVG}</g>
 
-  <!-- Horizon Ground Line -->
   ${groundLine}
 
-  <!-- Header Info -->
   ${!params.hide_title ? `<text x="30" y="38" class="title">${safeUser}</text>` : ''}
   ${
     !params.hide_stats
@@ -3293,17 +3290,17 @@ export function generateActivityGraphSVG(
 >
   <title id="cp-title-${safeId}">Activity Graph for ${safeUser}</title>
   <desc id="cp-desc-${safeId}">Contribution activity graph for ${safeUser} over ${days} days, totalling ${totalCount} ${unit.toLowerCase()}.</desc>
-  ${_renderActivityGraphDefs(accent, bg, params)}
+  &lt;!--_renderActivityGraphDefs(accent, bg, params)--&gt;
   <style>
   @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap');
   ${googleFontsImport}
-  ${_activityGraphCSS(selectedFont, statsFont, text, accent, false)}
+  &lt;!--_activityGraphCSS(selectedFont, statsFont, text, accent, false)--&gt;
   </style>
   <rect width="${width}" height="${height}" rx="${radius}" fill="${params.hideBackground ? 'transparent' : bgFill}" />
   <path class="ag-area" d="${areaPathD}" />
   <path class="ag-trend" d="${trendPathD}" stroke="${accent}" />
   <path class="ag-line" d="${pathD}" stroke="${accent}" />
-  ${_renderPeakAnnotation(peakX, peakY, peakCount, peakDate, accent, text, statsFont, false)}
+  &lt;!--_renderPeakAnnotation(peakX, peakY, peakCount, peakDate, accent, text, statsFont, false)--&gt;
   ${!params.hide_title ? `<text x="24" y="28" class="ag-title">${safeUser.toUpperCase()}${params.isOfflineFallback ? '<tspan fill="#ff9f43" font-size="10px" font-weight="bold"> [STALE CACHE]</tspan>' : ''}</text>` : ''}
   ${!params.hide_stats ? `<text x="${width - 24}" y="28" text-anchor="end" class="ag-total">${totalCount} ${unit}</text>` : ''}
 </svg>
@@ -3370,13 +3367,13 @@ function generateAutoThemeActivityGraphSVG(
   :root { --cp-bg: #${light.bg}; --cp-text: #${light.text}; --cp-accent: #${light.accent}; }
   @media (prefers-color-scheme: dark) { :root { --cp-bg: #${dark.bg}; --cp-text: #${dark.text}; --cp-accent: #${dark.accent}; } }
   .cp-bg-fill { fill: var(--cp-bg); }
-  ${_activityGraphCSS(selectedFont, statsFont, 'var(--cp-text)', 'var(--cp-accent)', true)}
+  &lt;!--_activityGraphCSS(selectedFont, statsFont, 'var(--cp-text)', 'var(--cp-accent)', true)--&gt;
   </style>
   <rect width="${width}" height="${height}" rx="${radius}" ${params.hideBackground ? 'fill="transparent"' : 'class="cp-bg-fill"'} />
   <path class="ag-area" d="${areaPathD}" />
   <path class="ag-trend" d="${trendPathD}" stroke="var(--cp-accent)" />
   <path class="ag-line" d="${pathD}" stroke="var(--cp-accent)" />
-  ${_renderPeakAnnotation(peakX, peakY, peakCount, peakDate, 'var(--cp-accent)', 'var(--cp-text)', statsFont, true)}
+  &lt;!--_renderPeakAnnotation(peakX, peakY, peakCount, peakDate, 'var(--cp-accent)', 'var(--cp-text)', statsFont, true)--&gt;
   ${!params.hide_title ? `<text x="24" y="28" class="ag-title">${safeUser.toUpperCase()}${params.isOfflineFallback ? '<tspan fill="#ff9f43" font-size="10px" font-weight="bold"> [STALE CACHE]</tspan>' : ''}</text>` : ''}
   ${!params.hide_stats ? `<text x="${width - 24}" y="28" text-anchor="end" class="ag-total">${totalCount} ${unit}</text>` : ''}
 </svg>
