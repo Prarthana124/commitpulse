@@ -251,13 +251,30 @@ const PREDICTIONS = [
 
 // CountUp counter subcomponent
 function CountUp({ to, duration = 1800 }: { to: number; duration?: number }) {
-  const supportsObserver = typeof window !== 'undefined' && 'IntersectionObserver' in window;
-  const [count, setCount] = useState(() => (supportsObserver ? 0 : to));
+  // SSR hydration guard: server and client both render count=0
+  // so the initial markup matches. The animation starts only
+  // after hydration to prevent React hydration mismatches.
+  const [mounted, setMounted] = useState(false);
+  const [count, setCount] = useState(0);
+
   const elementRef = useRef<HTMLSpanElement>(null);
-  const hasAnimated = useRef(!supportsObserver);
+  const hasAnimated = useRef(false);
 
   useEffect(() => {
-    if (!supportsObserver) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
+    if (!('IntersectionObserver' in window)) {
+      setTimeout(() => {
+        setCount(to);
+      }, 0);
+      hasAnimated.current = true;
+      return;
+    }
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -289,7 +306,7 @@ function CountUp({ to, duration = 1800 }: { to: number; duration?: number }) {
     }
 
     return () => observer.disconnect();
-  }, [to, duration, supportsObserver]);
+  }, [to, duration, mounted]);
 
   return <span ref={elementRef}>{count.toLocaleString()}</span>;
 }
