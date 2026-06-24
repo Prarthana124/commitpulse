@@ -172,7 +172,7 @@ describe('GitHub Multi-Token Rotation & Fallback', () => {
   });
 
   it('decrypts encrypted tokens if GITHUB_TOKEN_ENCRYPTION_KEY is present', () => {
-    const validKey = Buffer.alloc(32, 'a').toString('base64');
+    const validKey = 'a'.repeat(32);
     const originalKey = process.env.GITHUB_TOKEN_ENCRYPTION_KEY;
     process.env.GITHUB_TOKEN_ENCRYPTION_KEY = validKey;
 
@@ -180,7 +180,7 @@ describe('GitHub Multi-Token Rotation & Fallback', () => {
       const rawToken = 'ghp_myRealGitHubToken';
       const encrypted = encryptGitHubToken(rawToken);
 
-      expect(encrypted).toContain(':');
+      expect(encrypted).toContain('.');
 
       process.env.GITHUB_PAT = `${encrypted}, ghp_anotherPlaintextToken`;
       delete process.env.GITHUB_TOKEN;
@@ -194,10 +194,11 @@ describe('GitHub Multi-Token Rotation & Fallback', () => {
 
   it('gracefully falls back to raw token on decryption failure', () => {
     const originalKey = process.env.GITHUB_TOKEN_ENCRYPTION_KEY;
-    process.env.GITHUB_TOKEN_ENCRYPTION_KEY = Buffer.alloc(32, 'b').toString('base64');
+    process.env.GITHUB_TOKEN_ENCRYPTION_KEY = 'a'.repeat(32);
 
     try {
-      const fakeEncryptedToken = '1234567890abcdef1234567890abcdef:abcdefabcdef';
+      const fakeEncryptedToken = 'YWJj.ZGVm.YWJj.';
+
       process.env.GITHUB_PAT = fakeEncryptedToken;
       delete process.env.GITHUB_TOKEN;
 
