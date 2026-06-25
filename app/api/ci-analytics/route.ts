@@ -3,14 +3,12 @@ import { fetchCIAnalytics } from '@/services/github/ci-analytics';
 import { getUserGitHubToken } from '@/lib/githubtoken';
 import { validateGitHubUsername } from '@/lib/validations';
 import { RateLimiter } from '@/lib/rate-limit';
+import { getClientIp } from '@/utils/getClientIp';
 
-const ciAnalyticsLimiter = new RateLimiter(10, 60_000, 1);
+const ciAnalyticsLimiter = new RateLimiter(10, 60_000, 10_000);
 
 export async function GET(request: Request) {
-  const ip =
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-    request.headers.get('x-real-ip') ??
-    'unknown';
+  const ip = getClientIp(request);
 
   if (!(await ciAnalyticsLimiter.check(ip))) {
     return NextResponse.json(
@@ -29,9 +27,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Invalid GitHub username' }, { status: 400 });
   }
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
+
   try {
     const userToken = await getUserGitHubToken();
-    const data = await fetchCIAnalytics(username, userToken);
+    const data = await fetchCIAnalytics(username, userToken, controller.signal);
     return NextResponse.json(data);
   } catch (error: unknown) {
     console.error('Error fetching CI analytics:', error);
@@ -39,5 +40,7 @@ export async function GET(request: Request) {
       { error: error instanceof Error ? error.message : 'Failed to fetch CI analytics' },
       { status: 500 }
     );
+  } finally {
+    clearTimeout(timeoutId);
   }
 }

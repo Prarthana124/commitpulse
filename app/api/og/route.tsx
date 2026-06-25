@@ -2,10 +2,11 @@
 
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
-import { ogParamsSchema } from '@/lib/validations';
+import { ogParamsSchema, coerceQueryParams } from '@/lib/validations';
 import { themes } from '@/lib/svg/themes';
 import { fetchGitHubContributions } from '@/lib/github';
 import { calculateStreak } from '@/lib/calculate';
+import { logger } from '@/lib/logger';
 import { getClientIp } from '@/utils/getClientIp';
 import { RateLimiter } from '@/lib/rate-limit';
 
@@ -54,7 +55,7 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = new URL(req.url);
 
-  const parseResult = ogParamsSchema.safeParse(Object.fromEntries(searchParams.entries()));
+  const parseResult = ogParamsSchema.safeParse(coerceQueryParams(searchParams));
 
   if (!parseResult.success) {
     return new Response(
@@ -116,7 +117,11 @@ export async function GET(req: NextRequest) {
     longestStreak = stats.longestStreak;
     currentStreak = stats.currentStreak;
   } catch (err) {
-    console.error('[OG] stats fetch failed:', err);
+    logger.error('Stats fetch failed', {
+      source: 'OG',
+      error: err,
+    });
+    // fallback to zeros if GitHub is unreachable
   }
 
   const cacheControl = isRefreshRequested

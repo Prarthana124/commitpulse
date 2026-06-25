@@ -5,6 +5,7 @@ import PRInsightsClient from './PRInsightsClient';
 import type { PRInsightData } from '@/services/github/pr-insights';
 
 vi.mock('framer-motion', () => ({
+  AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   motion: new Proxy(
     {},
     {
@@ -88,6 +89,7 @@ const mockInsights: PRInsightData = {
       deletions: 80,
     },
   },
+  prs: [],
 };
 
 function mockFetchWith(data: PRInsightData = mockInsights) {

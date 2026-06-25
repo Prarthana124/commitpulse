@@ -73,7 +73,8 @@ export function getClientIp(
   const config = opt.proxyConfig || loadTrustedProxyConfig();
 
   // 1. NextRequest has a secure, platform-populated request.ip property on Vercel/Next.js
-  const requestIp = (request as unknown as { ip?: string }).ip;
+  const requestIp =
+    request instanceof NextRequest ? (request as NextRequest & { ip?: string }).ip : undefined;
   if (request instanceof NextRequest && requestIp) {
     const rawXff = headers.get('x-forwarded-for');
     if (rawXff) {
@@ -140,7 +141,7 @@ export function getClientIp(
 
       // Traverse from right to left (most recent to oldest proxy hop)
       // The rightmost IP is the one that connected directly to our server/balancer
-      let clientIp = directIp;
+      let clientIp = defaultIp;
 
       for (let i = ips.length - 1; i >= 0; i--) {
         const currentIp = ips[i];
@@ -148,8 +149,6 @@ export function getClientIp(
           // If the proxy is trusted, the client IP is the one preceding it (to the left)
           if (i > 0) {
             clientIp = ips[i - 1];
-          } else {
-            clientIp = currentIp;
           }
         } else {
           // Found the first untrusted IP in the chain - this is our true client

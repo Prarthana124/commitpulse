@@ -44,29 +44,25 @@ describe('VisualizationTooltip type compiler tests', () => {
   it('rejects invalid property types during compilation', () => {
     expectTypeOf<VisualizationTooltipProps>().toBeObject();
 
-    it('rejects invalid property types during compilation', () => {
-      expectTypeOf<VisualizationTooltipProps>().toBeObject();
+    void ({
+      title: 'Test',
+      children: 'Content',
+      // @ts-expect-error x must be number
+      x: '100',
+      y: 200,
+    } satisfies VisualizationTooltipProps);
+  });
 
-      void ({
-        title: 'Test',
-        children: 'Content',
-        // @ts-expect-error x must be number
-        x: '100',
-        y: 200,
-      } satisfies VisualizationTooltipProps);
-    });
+  it('rejects missing required properties', () => {
+    expectTypeOf<VisualizationTooltipProps>().toBeObject();
 
-    it('rejects missing required properties', () => {
-      expectTypeOf<VisualizationTooltipProps>().toBeObject();
+    // @ts-expect-error y is required
+    const _invalidProps: VisualizationTooltipProps = {
+      title: 'Test',
+      children: 'Content',
+      x: 100,
+    };
 
-      // @ts-expect-error y is required
-      const _invalidProps: VisualizationTooltipProps = {
-        title: 'Test',
-        children: 'Content',
-        x: 100,
-      };
-
-      expect(_invalidProps).toBeDefined();
-    });
+    expect(_invalidProps).toBeDefined();
   });
 });
