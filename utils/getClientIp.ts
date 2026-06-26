@@ -104,15 +104,13 @@ export function getClientIp(
   if (!directIp) {
     // 2a. Wildcard trust (TRUSTED_PROXIES=* env var, or Vercel auto-trust, or explicit proxyConfig
     //     with '*'). Read the leftmost XFF entry as the true client IP.
+    //     Note: no security event is logged here — wildcard trust without a directIp is the
+    //     expected path for platform-managed deployments (e.g. Vercel auto-detection).
     if (config.trustedProxies.includes('*')) {
       const xff = headers.get('x-forwarded-for');
       if (xff) {
         const firstIp = xff.split(',')[0].trim();
         if (firstIp) {
-          logSecurityEvent('WILDCARD_TRUST_USED', {
-            resolvedIp: firstIp,
-            header: 'x-forwarded-for',
-          });
           return firstIp;
         }
       }
