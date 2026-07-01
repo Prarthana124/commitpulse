@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import SubmitReviewPage from './reviewform';
 import React from 'react';
 
@@ -46,7 +46,13 @@ describe('Asynchronous Service Layer Mocking & Local Cache Stubs', () => {
     expect(await screen.findByText('Submitting...')).toBeInTheDocument();
 
     // Cleanup
-    resolveFetch({ ok: true, json: async () => ({ success: true, message: 'Success' }) });
+    await act(async () => {
+      resolveFetch({ ok: true, json: async () => ({ success: true, message: 'Success' }) });
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Thank You!')).toBeInTheDocument();
+    });
   });
 
   it('asserts local cache layers are queried before triggering database retrievals', async () => {
