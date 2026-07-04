@@ -8,8 +8,8 @@ const interactiveViewerSchema = z.object({
   children: z.custom<ReactNode>(),
   className: z.string().optional(),
   is3DMode: z.boolean().optional(),
-  onRotate3D: z.function(z.tuple([z.number(), z.number()]), z.void()).optional(),
-  onReset3D: z.function(z.tuple([]), z.void()).optional(),
+  onRotate3D: z.function().args(z.number(), z.number()).returns(z.void()).optional(),
+  onReset3D: z.function().args().returns(z.void()).optional(),
 });
 
 type InteractiveViewerProps = React.ComponentProps<typeof InteractiveViewer>;
@@ -40,7 +40,7 @@ describe('InteractiveViewer TypeScript Compiler Validation & Schema Constraints 
     // @ts-expect-error - 'is3DMode' should be boolean, not string
     const invalidProps1: InteractiveViewerProps = { children: <div />, is3DMode: 'true' };
 
-    // @ts-expect-error - 'onRotate3D' expects two numbers
+    // @ts-expect-error - 'onRotate3D' expects (dx: number, dy: number) => void
     const invalidProps2: InteractiveViewerProps = {
       children: <div />,
       onRotate3D: (x: string) => {},
@@ -87,10 +87,12 @@ describe('InteractiveViewer TypeScript Compiler Validation & Schema Constraints 
     expect(resultInvalid.success).toBe(false);
 
     if (!resultInvalid.success) {
-      // Assert strict validation report structure
-      expect(resultInvalid.error.issues[0].code).toBe('invalid_type');
-      expect(resultInvalid.error.issues[0].path).toEqual(['is3DMode']);
-      expect(resultInvalid.error.issues[0].expected).toBe('boolean');
+      const issue = resultInvalid.error.issues[0];
+      expect(issue.code).toBe('invalid_type');
+      expect(issue.path).toEqual(['is3DMode']);
+      if (issue.code === 'invalid_type') {
+        expect(issue.expected).toBe('boolean');
+      }
     }
   });
 });
