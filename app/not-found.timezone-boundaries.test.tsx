@@ -54,9 +54,12 @@ describe('NotFound Component - Timezone Normalization & Calendar Data Boundary A
     vi.setSystemTime(new Date('2023-12-31T23:59:59Z'));
     const { container } = render(<NotFound />);
 
+    // "git checkout this-page" is split across nested <span> elements in the markup
+    // (the "this-page" portion is wrapped in its own <span className="text-cyan-400">),
+    // so getByText with a regex won't match any single element's own text node.
     // Asserting on the combined textContent avoids that false negative.
     expect(container.textContent).toMatch(/git checkout this-page/i);
-    expect(screen.getByText(/Return Home/i)).toBeInTheDocument();
+    expect(screen.getByText(/Go back home/i)).toBeInTheDocument();
   });
 
   it('Verify leap year boundaries parse without leaving gaps in grids', () => {
@@ -75,7 +78,7 @@ describe('NotFound Component - Timezone Normalization & Calendar Data Boundary A
     render(<NotFound />);
 
     // Verifying primary user interactions are unaffected by the system date/locale configurations
-    const homeLink = screen.getByRole('link', { name: /Return Home/i });
+    const homeLink = screen.getByRole('link', { name: /Go back home/i });
     expect(homeLink).toHaveAttribute('href', '/');
     expect(screen.getByText(/No stash\. No reflog\. Just vibes\./i)).toBeInTheDocument();
   });
